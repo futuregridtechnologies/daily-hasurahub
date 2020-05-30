@@ -1,0 +1,8 @@
+- name: dailykey
+  definition:
+    url_from_env: DAILY_KEY_REMOTE_SCHEMA_URL
+    timeout_seconds: 60
+    headers:
+    - name: Organization-Id
+      value_from_env: HEADER_REMOTE_SCHEMA_ORGANIZATIONID
+    forward_client_headers: true

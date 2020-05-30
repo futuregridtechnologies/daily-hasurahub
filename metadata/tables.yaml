@@ -1,0 +1,1956 @@
+- table:
+    schema: crm
+    name: customer
+  configuration:
+    custom_root_fields:
+      insert: createCustomers
+      insert_one: createCustomer
+      select_by_pk: customer
+      select: customers
+      delete: deleteCustomers
+      update: updateCustomers
+      delete_by_pk: deleteCustomer
+      update_by_pk: updateCustomer
+    custom_column_names: {}
+  array_relationships:
+  - name: orderCarts
+    using:
+      foreign_key_constraint_on:
+        column: customerId
+        table:
+          schema: crm
+          name: orderCart
+  - name: orders
+    using:
+      foreign_key_constraint_on:
+        column: customerId
+        table:
+          schema: order
+          name: order
+  event_triggers:
+  - name: createCustomerByClient
+    definition:
+      enable_manual: true
+      insert:
+        columns: '*'
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook_from_env: WEBHOOK_CREATE_CUSTOMER_BY_CLIENT
+- table:
+    schema: crm
+    name: orderCart
+  configuration:
+    custom_root_fields:
+      insert: createCarts
+      select_aggregate: cartAggregate
+      insert_one: createCart
+      select_by_pk: cartByPK
+      select: cart
+      delete: deleteCarts
+      update: updateCart
+      delete_by_pk: deleteCartByPK
+      update_by_pk: updateCartByPK
+    custom_column_names: {}
+  object_relationships:
+  - name: customer
+    using:
+      foreign_key_constraint_on: customerId
+  - name: order
+    using:
+      foreign_key_constraint_on: orderId
+  computed_fields:
+  - name: isValid
+    definition:
+      function:
+        schema: crm
+        name: iscartvalid
+      table_argument: null
+    comment: ""
+  - name: deliveryPrice
+    definition:
+      function:
+        schema: crm
+        name: deliveryprice
+      table_argument: null
+    comment: ""
+  - name: itemTotal
+    definition:
+      function:
+        schema: crm
+        name: itemtotal
+      table_argument: null
+    comment: ""
+  - name: tax
+    definition:
+      function:
+        schema: crm
+        name: tax
+      table_argument: null
+    comment: ""
+  - name: taxPercent
+    definition:
+      function:
+        schema: crm
+        name: taxpercent
+      table_argument: null
+    comment: ""
+  - name: totalPrice
+    definition:
+      function:
+        schema: crm
+        name: totalprice
+      table_argument: null
+    comment: ""
+  event_triggers:
+  - name: initiateOrder
+    definition:
+      enable_manual: true
+      update:
+        columns:
+        - paymentStatus
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook_from_env: WEBHOOK_INITIATE_ORDER
+  - name: initiatePayment
+    definition:
+      enable_manual: true
+      update:
+        columns:
+        - status
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook_from_env: WEBHOOK_INITIATE_PAYMENT
+- table:
+    schema: deviceHub
+    name: computer
+  array_relationships:
+  - name: labelPrinters
+    using:
+      foreign_key_constraint_on:
+        column: computerId
+        table:
+          schema: deviceHub
+          name: labelPrinter
+  - name: receiptPrinters
+    using:
+      foreign_key_constraint_on:
+        column: computerId
+        table:
+          schema: deviceHub
+          name: receiptPrinter
+  - name: scanners
+    using:
+      foreign_key_constraint_on:
+        column: computerId
+        table:
+          schema: deviceHub
+          name: scanner
+  - name: weighingScales
+    using:
+      foreign_key_constraint_on:
+        column: computerId
+        table:
+          schema: deviceHub
+          name: weighingScale
+- table:
+    schema: deviceHub
+    name: kdsTerminal
+- table:
+    schema: deviceHub
+    name: labelPrinter
+  object_relationships:
+  - name: computer
+    using:
+      foreign_key_constraint_on: computerId
+- table:
+    schema: deviceHub
+    name: labelTemplate
+- table:
+    schema: deviceHub
+    name: receiptPrinter
+  object_relationships:
+  - name: computer
+    using:
+      foreign_key_constraint_on: computerId
+- table:
+    schema: deviceHub
+    name: scanner
+  object_relationships:
+  - name: computer
+    using:
+      foreign_key_constraint_on: computerId
+- table:
+    schema: deviceHub
+    name: user_station
+- table:
+    schema: deviceHub
+    name: weighingScale
+  object_relationships:
+  - name: computer
+    using:
+      foreign_key_constraint_on: computerId
+- table:
+    schema: ingredient
+    name: ingredient
+  configuration:
+    custom_root_fields:
+      insert: createIngredient
+      select_aggregate: ingredientsAggregate
+      select_by_pk: ingredient
+      select: ingredients
+      delete: deleteIngredient
+      update: updateIngredient
+    custom_column_names: {}
+  array_relationships:
+  - name: ingredientProcessings
+    using:
+      foreign_key_constraint_on:
+        column: ingredientId
+        table:
+          schema: ingredient
+          name: ingredientProcessing
+  - name: ingredientSachets
+    using:
+      foreign_key_constraint_on:
+        column: ingredientId
+        table:
+          schema: ingredient
+          name: ingredientSachet
+  computed_fields:
+  - name: isValid
+    definition:
+      function:
+        schema: ingredient
+        name: isingredientvalid
+      table_argument: null
+    comment: ""
+- table:
+    schema: ingredient
+    name: ingredientProcessing
+  configuration:
+    custom_root_fields:
+      insert: createIngredientProcessing
+      select_aggregate: ingredientProcessingsAggregate
+      select_by_pk: ingredientProcessing
+      select: ingredientProcessings
+      delete: deleteIngredientProcessing
+      update: updateIngredientProcessing
+    custom_column_names: {}
+  object_relationships:
+  - name: ingredient
+    using:
+      foreign_key_constraint_on: ingredientId
+  - name: processing
+    using:
+      foreign_key_constraint_on: processingName
+  array_relationships:
+  - name: ingredientSachets
+    using:
+      foreign_key_constraint_on:
+        column: ingredientProcessingId
+        table:
+          schema: ingredient
+          name: ingredientSachet
+- table:
+    schema: ingredient
+    name: ingredientSachet
+  configuration:
+    custom_root_fields:
+      insert: createIngredientSachet
+      select_aggregate: ingredientSachetsAggregate
+      select_by_pk: ingredientSachet
+      select: ingredientSachets
+      delete: deleteIngredientSachet
+      update: updateIngredientSachet
+    custom_column_names: {}
+  object_relationships:
+  - name: ingredient
+    using:
+      foreign_key_constraint_on: ingredientId
+  - name: ingredientProcessing
+    using:
+      foreign_key_constraint_on: ingredientProcessingId
+  - name: liveModeOfFulfillment
+    using:
+      foreign_key_constraint_on: liveMOF
+  - name: unitId
+    using:
+      foreign_key_constraint_on: unit
+  array_relationships:
+  - name: modeOfFulfillments
+    using:
+      foreign_key_constraint_on:
+        column: ingredientSachetId
+        table:
+          schema: ingredient
+          name: modeOfFulfillment
+  - name: recipeYields
+    using:
+      foreign_key_constraint_on:
+        column: ingredientSachetId
+        table:
+          schema: simpleRecipe
+          name: simpleRecipeYield_ingredientSachet
+  computed_fields:
+  - name: isValid
+    definition:
+      function:
+        schema: ingredient
+        name: issachetvalid
+      table_argument: null
+    comment: ""
+- table:
+    schema: ingredient
+    name: modeOfFulfillment
+  configuration:
+    custom_root_fields:
+      insert: createModeOfFulfillments
+      select_aggregate: modeOfFulfillmentsAggregate
+      insert_one: createModeOfFulfillment
+      select_by_pk: modeOfFulfillment
+      select: modeOfFulfillments
+      delete: deleteModeOfFulfillments
+      update: updateModeOfFulfillments
+      delete_by_pk: deleteModeOfFulfillment
+      update_by_pk: updateModeOfFulfillment
+    custom_column_names: {}
+  object_relationships:
+  - name: bulkItem
+    using:
+      foreign_key_constraint_on: bulkItemId
+  - name: ingredientSachet
+    using:
+      foreign_key_constraint_on: ingredientSachetId
+  - name: labelTemplate
+    using:
+      foreign_key_constraint_on: labelTemplateId
+  - name: packaging
+    using:
+      foreign_key_constraint_on: packagingId
+  - name: sachetItem
+    using:
+      foreign_key_constraint_on: sachetItemId
+  - name: station
+    using:
+      foreign_key_constraint_on: stationId
+  computed_fields:
+  - name: isValid
+    definition:
+      function:
+        schema: ingredient
+        name: ismodevalid
+      table_argument: null
+    comment: ""
+  event_triggers:
+  - name: mofUpdate
+    definition:
+      enable_manual: false
+      insert:
+        columns: '*'
+      update:
+        columns:
+        - isLive
+        - isPublished
+        - priority
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook_from_env: WEBHOOK_MOF_UPDATE
+- table:
+    schema: ingredient
+    name: modeOfFulfillmentEnum
+  is_enum: true
+- table:
+    schema: inventory
+    name: bulkItem
+  configuration:
+    custom_root_fields:
+      insert: createBulkItem
+      select_aggregate: bulkItemsAggregate
+      select_by_pk: bulkItem
+      select: bulkItems
+      delete: deleteBulkItem
+      update: updateBulkItem
+    custom_column_names: {}
+  object_relationships:
+  - name: processing
+    using:
+      foreign_key_constraint_on: processingName
+  - name: supplierItem
+    using:
+      foreign_key_constraint_on: supplierItemId
+  - name: unitId
+    using:
+      foreign_key_constraint_on: unit
+  array_relationships:
+  - name: bulkItemHistories
+    using:
+      foreign_key_constraint_on:
+        column: bulkItemId
+        table:
+          schema: inventory
+          name: bulkItemHistory
+  - name: modeOfFulfillments
+    using:
+      foreign_key_constraint_on:
+        column: bulkItemId
+        table:
+          schema: ingredient
+          name: modeOfFulfillment
+  - name: orderSachets
+    using:
+      foreign_key_constraint_on:
+        column: bulkItemId
+        table:
+          schema: order
+          name: orderSachet
+  - name: purchaseOrderItems
+    using:
+      foreign_key_constraint_on:
+        column: bulkItemId
+        table:
+          schema: inventory
+          name: purchaseOrderItem
+  - name: sachetItems
+    using:
+      foreign_key_constraint_on:
+        column: bulkItemId
+        table:
+          schema: inventory
+          name: sachetItem
+  - name: sachetWorkOrders
+    using:
+      foreign_key_constraint_on:
+        column: inputBulkItemId
+        table:
+          schema: inventory
+          name: sachetWorkOrder
+  - name: unitConversions
+    using:
+      foreign_key_constraint_on:
+        column: bulkItemId
+        table:
+          schema: inventory
+          name: unitConversionByBulkItem
+  - name: workOrdersAsInput
+    using:
+      foreign_key_constraint_on:
+        column: inputBulkItemId
+        table:
+          schema: inventory
+          name: bulkWorkOrder
+  - name: workOrdersAsOutput
+    using:
+      foreign_key_constraint_on:
+        column: outputBulkItemId
+        table:
+          schema: inventory
+          name: bulkWorkOrder
+  event_triggers:
+  - name: bulkItemUpdate
+    definition:
+      enable_manual: false
+      update:
+        columns:
+        - onHand
+        - isAvailable
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook_from_env: WEBHOOK_BULK_ITEM_UPDATE
+- table:
+    schema: inventory
+    name: bulkItemHistory
+  configuration:
+    custom_root_fields:
+      insert: createBulkItemHistory
+      select_aggregate: bulkItemHistoriesAggregate
+      select_by_pk: bulkItemHistory
+      select: bulkItemHistories
+      delete: deleteBulkItemHistory
+      update: updateBulkItemHistory
+    custom_column_names: {}
+  object_relationships:
+  - name: bulkItem
+    using:
+      foreign_key_constraint_on: bulkItemId
+  - name: bulkWorkOrder
+    using:
+      foreign_key_constraint_on: bulkWorkOrderId
+  - name: orderSachet
+    using:
+      foreign_key_constraint_on: orderSachetId
+  - name: purchaseOrderItem
+    using:
+      foreign_key_constraint_on: purchaseOrderItemId
+  - name: sachetWorkOrder
+    using:
+      foreign_key_constraint_on: sachetWorkOrderId
+  - name: unitId
+    using:
+      foreign_key_constraint_on: unit
+  event_triggers:
+  - name: BulkItemHistoryCreateUpdate
+    definition:
+      enable_manual: true
+      insert:
+        columns: '*'
+      update:
+        columns:
+        - bulkItemId
+        - id
+        - orderSachetId
+        - purchaseOrderItemId
+        - bulkWorkOrderId
+        - comment
+        - quantity
+        - status
+        - unit
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook_from_env: WEBHOOK_BULK_ITEM_HISTORY_UPSERT
+- table:
+    schema: inventory
+    name: bulkWorkOrder
+  configuration:
+    custom_root_fields:
+      insert: createBulkWorkOrder
+      select_aggregate: bulkWorkOrdersAggregate
+      select_by_pk: bulkWorkOrder
+      select: bulkWorkOrders
+      delete: deleteBulkWorkOrder
+      update: updateBulkWorkOrder
+    custom_column_names: {}
+  object_relationships:
+  - name: inputBulkItem
+    using:
+      foreign_key_constraint_on: inputBulkItemId
+  - name: inputQuantityUnitId
+    using:
+      foreign_key_constraint_on: inputQuantityUnit
+  - name: outputBulkItem
+    using:
+      foreign_key_constraint_on: outputBulkItemId
+  - name: station
+    using:
+      foreign_key_constraint_on: stationId
+  - name: user
+    using:
+      foreign_key_constraint_on: userId
+  array_relationships:
+  - name: bulkItemHistories
+    using:
+      foreign_key_constraint_on:
+        column: bulkWorkOrderId
+        table:
+          schema: inventory
+          name: bulkItemHistory
+  event_triggers:
+  - name: BulkWorkOrderCreateUpdate
+    definition:
+      enable_manual: true
+      insert:
+        columns: '*'
+      update:
+        columns:
+        - id
+        - inputBulkItemId
+        - outputBulkItemId
+        - userId
+        - inputQuantity
+        - outputQuantity
+        - inputQuantityUnit
+        - status
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook_from_env: WEBHOOK_BULK_WORK_ORDER_HISTORY_CREATE_UPDATE
+- table:
+    schema: inventory
+    name: purchaseOrderItem
+  configuration:
+    custom_root_fields:
+      insert: createPurchaseOrderItem
+      select_aggregate: purchaseOrderItemsAggregate
+      select_by_pk: purchaseOrderItem
+      select: purchaseOrderItems
+      delete: deletePurchaseOrderItem
+      update: updatePurchaseOrderItem
+    custom_column_names: {}
+  object_relationships:
+  - name: bulkItem
+    using:
+      foreign_key_constraint_on: bulkItemId
+  - name: supplier
+    using:
+      foreign_key_constraint_on: supplierId
+  - name: supplierItem
+    using:
+      foreign_key_constraint_on: supplierItemId
+  - name: unitId
+    using:
+      foreign_key_constraint_on: unit
+  array_relationships:
+  - name: bulkItemHistories
+    using:
+      foreign_key_constraint_on:
+        column: purchaseOrderItemId
+        table:
+          schema: inventory
+          name: bulkItemHistory
+  event_triggers:
+  - name: purchaseOrderItemCreateUpdate
+    definition:
+      enable_manual: true
+      insert:
+        columns: '*'
+      update:
+        columns:
+        - bulkItemId
+        - id
+        - supplierId
+        - supplierItemId
+        - details
+        - orderQuantity
+        - status
+        - unit
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook_from_env: WEBHOOK_PURCHASE_ORDER_ITEM_CREATE_UPDATE
+- table:
+    schema: inventory
+    name: sachetItem
+  configuration:
+    custom_root_fields:
+      insert: createSachetItem
+      select_aggregate: sachetItemsAggregate
+      select_by_pk: sachetItem
+      select: sachetItems
+      delete: deleteSachetItem
+      update: updateSachetItem
+    custom_column_names: {}
+  object_relationships:
+  - name: bulkItem
+    using:
+      foreign_key_constraint_on: bulkItemId
+  - name: unitId
+    using:
+      foreign_key_constraint_on: unit
+  array_relationships:
+  - name: inventoryProducts
+    using:
+      foreign_key_constraint_on:
+        column: sachetItemId
+        table:
+          schema: onlineStore
+          name: inventoryProduct
+  - name: modeOfFulfillments
+    using:
+      foreign_key_constraint_on:
+        column: sachetItemId
+        table:
+          schema: ingredient
+          name: modeOfFulfillment
+  - name: orderSachets
+    using:
+      foreign_key_constraint_on:
+        column: sachetItemId
+        table:
+          schema: order
+          name: orderSachet
+  - name: sachetItemHistories
+    using:
+      foreign_key_constraint_on:
+        column: sachetItemId
+        table:
+          schema: inventory
+          name: sachetItemHistory
+  - name: sachetWorkOrders
+    using:
+      foreign_key_constraint_on:
+        column: outputSachetItemId
+        table:
+          schema: inventory
+          name: sachetWorkOrder
+  event_triggers:
+  - name: sachetItemUpdate
+    definition:
+      enable_manual: false
+      update:
+        columns:
+        - isAvailable
+        - onHand
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook_from_env: WEBHOOK_BULK_ITEM_UPDATE
+- table:
+    schema: inventory
+    name: sachetItemHistory
+  configuration:
+    custom_root_fields:
+      insert: createSachetItemHistory
+      select_aggregate: sachetItemHistoriesAggregate
+      select_by_pk: sachetItemHistory
+      select: sachetItemHistories
+      delete: deleteSachetItemHistory
+      update: updateSachetItemHistory
+    custom_column_names: {}
+  object_relationships:
+  - name: orderSachet
+    using:
+      foreign_key_constraint_on: orderSachetId
+  - name: sachetItem
+    using:
+      foreign_key_constraint_on: sachetItemId
+  - name: sachetWorkOrder
+    using:
+      foreign_key_constraint_on: sachetWorkOrderId
+  - name: unitId
+    using:
+      foreign_key_constraint_on: unit
+  event_triggers:
+  - name: SachetItemHistoryCreateUpdate
+    definition:
+      enable_manual: true
+      insert:
+        columns: '*'
+      update:
+        columns:
+        - id
+        - orderSachetId
+        - sachetItemId
+        - sachetWorkOrderId
+        - quantity
+        - status
+        - unit
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook_from_env: WEBHOOK_SACHET_HISTORY_CREATE_UPDATE
+- table:
+    schema: inventory
+    name: sachetWorkOrder
+  configuration:
+    custom_root_fields:
+      insert: createSachetWorkOrder
+      select_aggregate: sachetWorkOrdersAggregate
+      select_by_pk: sachetWorkOrder
+      select: sachetWorkOrders
+      delete: deleteSachetWorkOrder
+      update: updateSachetWorkOrder
+    custom_column_names: {}
+  object_relationships:
+  - name: bulkItem
+    using:
+      foreign_key_constraint_on: inputBulkItemId
+  - name: outputSachetItem
+    using:
+      foreign_key_constraint_on: outputSachetItemId
+  - name: packaging
+    using:
+      foreign_key_constraint_on: packagingId
+  - name: station
+    using:
+      foreign_key_constraint_on: stationId
+  - name: user
+    using:
+      foreign_key_constraint_on: userId
+  array_relationships:
+  - name: bulkItemHistories
+    using:
+      foreign_key_constraint_on:
+        column: sachetWorkOrderId
+        table:
+          schema: inventory
+          name: bulkItemHistory
+  - name: sachetItemHistories
+    using:
+      foreign_key_constraint_on:
+        column: sachetWorkOrderId
+        table:
+          schema: inventory
+          name: sachetItemHistory
+  event_triggers:
+  - name: SachetWorkOrderCreateUpdate
+    definition:
+      enable_manual: true
+      insert:
+        columns: '*'
+      update:
+        columns:
+        - id
+        - inputBulkItemId
+        - outputSachetItemId
+        - stationId
+        - userId
+        - inputQuantity
+        - outputQuantity
+        - status
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook_from_env: WEBHOOK_SACHET_WORK_ORDER_CREATE_UPDATE
+- table:
+    schema: inventory
+    name: supplier
+  configuration:
+    custom_root_fields:
+      insert: createSupplier
+      select_aggregate: suppliersAggregate
+      select_by_pk: supplier
+      select: suppliers
+      delete: deleteSupplier
+      update: updateSupplier
+    custom_column_names: {}
+  array_relationships:
+  - name: purchaseOrderItems
+    using:
+      foreign_key_constraint_on:
+        column: supplierId
+        table:
+          schema: inventory
+          name: purchaseOrderItem
+  - name: supplierItems
+    using:
+      foreign_key_constraint_on:
+        column: supplierId
+        table:
+          schema: inventory
+          name: supplierItem
+- table:
+    schema: inventory
+    name: supplierItem
+  configuration:
+    custom_root_fields:
+      insert: createSupplierItem
+      select_aggregate: supplierItemsAggregate
+      select_by_pk: supplierItem
+      select: supplierItems
+      delete: deleteSupplierItem
+      update: updateSupplierItem
+    custom_column_names: {}
+  object_relationships:
+  - name: supplier
+    using:
+      foreign_key_constraint_on: supplierId
+  - name: unitId
+    using:
+      foreign_key_constraint_on: unit
+  array_relationships:
+  - name: bulkItems
+    using:
+      foreign_key_constraint_on:
+        column: supplierItemId
+        table:
+          schema: inventory
+          name: bulkItem
+  - name: purchaseOrderItems
+    using:
+      foreign_key_constraint_on:
+        column: supplierItemId
+        table:
+          schema: inventory
+          name: purchaseOrderItem
+- table:
+    schema: inventory
+    name: unitConversionByBulkItem
+  configuration:
+    custom_root_fields:
+      insert: createUnitConversionByBulkItem
+      select_aggregate: unitConversionByBulkItemsAggregate
+      select_by_pk: unitConversionByBulkItem
+      select: unitConversionByBulkItems
+      delete: deleteUnitConversionByBulkItem
+      update: updateUnitConversionByBulkItem
+    custom_column_names: {}
+  object_relationships:
+  - name: bulkItem
+    using:
+      foreign_key_constraint_on: bulkItemId
+  - name: unitConversion
+    using:
+      foreign_key_constraint_on: unitConversionId
+- table:
+    schema: master
+    name: accompanimentType
+- table:
+    schema: master
+    name: allergenName
+  configuration:
+    custom_root_fields:
+      insert: createMasterAllergen
+      select_aggregate: masterAllergensAggregate
+      select_by_pk: masterAllergen
+      select: masterAllergens
+      delete: deleteMasterAllergen
+      update: updateMasterAllergen
+    custom_column_names: {}
+- table:
+    schema: master
+    name: cuisineName
+  configuration:
+    custom_root_fields:
+      insert: createCuisineName
+      select_aggregate: cuisineNamesAggregate
+      select_by_pk: cuisineName
+      select: cuisineNames
+      delete: deleteCuisineName
+      update: updateCuisineName
+    custom_column_names: {}
+  array_relationships:
+  - name: simpleRecipes
+    using:
+      foreign_key_constraint_on:
+        column: cuisine
+        table:
+          schema: simpleRecipe
+          name: simpleRecipe
+- table:
+    schema: master
+    name: processingName
+  configuration:
+    custom_root_fields:
+      insert: createMasterProcessing
+      select_aggregate: masterProcessingsAggregate
+      select_by_pk: masterProcessing
+      select: masterProcessings
+      delete: deleteMasterProcessing
+      update: updateMasterProcessing
+    custom_column_names: {}
+  array_relationships:
+  - name: bulkItems
+    using:
+      foreign_key_constraint_on:
+        column: processingName
+        table:
+          schema: inventory
+          name: bulkItem
+  - name: ingredientProcessings
+    using:
+      foreign_key_constraint_on:
+        column: processingName
+        table:
+          schema: ingredient
+          name: ingredientProcessing
+- table:
+    schema: onlineStore
+    name: category
+- table:
+    schema: onlineStore
+    name: comboProduct
+  configuration:
+    custom_root_fields:
+      insert: createComboProduct
+      select_aggregate: comboProductsAggregate
+      select_by_pk: comboProduct
+      select: comboProducts
+      delete: deleteComboProduct
+      update: updateComboProduct
+    custom_column_names: {}
+  array_relationships:
+  - name: comboProductComponents
+    using:
+      foreign_key_constraint_on:
+        column: comboProductId
+        table:
+          schema: onlineStore
+          name: comboProductComponent
+  - name: orderInventoryProducts
+    using:
+      foreign_key_constraint_on:
+        column: comboProductId
+        table:
+          schema: order
+          name: orderInventoryProduct
+  - name: orderMealKitProducts
+    using:
+      foreign_key_constraint_on:
+        column: comboProductId
+        table:
+          schema: order
+          name: orderMealKitProduct
+  - name: orderReadyToEatProducts
+    using:
+      foreign_key_constraint_on:
+        column: comboProductId
+        table:
+          schema: order
+          name: orderReadyToEatProduct
+  computed_fields:
+  - name: isValid
+    definition:
+      function:
+        schema: onlineStore
+        name: iscomboproductvalid
+      table_argument: null
+    comment: ""
+- table:
+    schema: onlineStore
+    name: comboProductComponent
+  configuration:
+    custom_root_fields:
+      insert: createComboProductComponent
+      select_aggregate: comboProductComponentsAggregate
+      select_by_pk: comboProductComponent
+      select: comboProductComponents
+      delete: deleteComboProductComponent
+      update: updateComboProductComponent
+    custom_column_names: {}
+  object_relationships:
+  - name: comboProduct
+    using:
+      foreign_key_constraint_on: comboProductId
+  - name: customizableProduct
+    using:
+      foreign_key_constraint_on: customizableProductId
+  - name: inventoryProduct
+    using:
+      foreign_key_constraint_on: inventoryProductId
+  - name: simpleRecipeProduct
+    using:
+      foreign_key_constraint_on: simpleRecipeProductId
+  array_relationships:
+  - name: orderInventoryProducts
+    using:
+      foreign_key_constraint_on:
+        column: comboProductComponentId
+        table:
+          schema: order
+          name: orderInventoryProduct
+  - name: orderMealKitProducts
+    using:
+      foreign_key_constraint_on:
+        column: comboProductComponentId
+        table:
+          schema: order
+          name: orderMealKitProduct
+  - name: orderReadyToEatProducts
+    using:
+      foreign_key_constraint_on:
+        column: comboProductComponentId
+        table:
+          schema: order
+          name: orderReadyToEatProduct
+- table:
+    schema: onlineStore
+    name: customizableProduct
+  configuration:
+    custom_root_fields:
+      insert: createCustomizableProduct
+      select_aggregate: customizableProductsAggregate
+      select_by_pk: customizableProduct
+      select: customizableProducts
+      delete: deleteCustomizableProduct
+      update: updateCustomizableProduct
+    custom_column_names: {}
+  object_relationships:
+  - name: defaultCustomizableProductOption
+    using:
+      foreign_key_constraint_on: default
+  array_relationships:
+  - name: comboProductComponents
+    using:
+      foreign_key_constraint_on:
+        column: customizableProductId
+        table:
+          schema: onlineStore
+          name: comboProductComponent
+  - name: customizableProductOptions
+    using:
+      foreign_key_constraint_on:
+        column: customizableProductId
+        table:
+          schema: onlineStore
+          name: customizableProductOption
+  - name: orderInventoryProducts
+    using:
+      foreign_key_constraint_on:
+        column: customizableProductId
+        table:
+          schema: order
+          name: orderInventoryProduct
+  - name: orderMealKitProducts
+    using:
+      foreign_key_constraint_on:
+        column: customizableProductId
+        table:
+          schema: order
+          name: orderMealKitProduct
+  - name: orderReadyToEatProducts
+    using:
+      foreign_key_constraint_on:
+        column: customizableProductId
+        table:
+          schema: order
+          name: orderReadyToEatProduct
+  computed_fields:
+  - name: isValid
+    definition:
+      function:
+        schema: onlineStore
+        name: iscustomizableproductvalid
+      table_argument: null
+    comment: ""
+- table:
+    schema: onlineStore
+    name: customizableProductOption
+  configuration:
+    custom_root_fields:
+      insert: createCustomizableProductOption
+      select_aggregate: customizableProductOptionsAggregate
+      select_by_pk: customizableProductOption
+      select: customizableProductOptions
+      delete: deleteCustomizableProductOption
+      update: updateCustomizableProductOption
+    custom_column_names: {}
+  object_relationships:
+  - name: customizableProduct
+    using:
+      foreign_key_constraint_on: customizableProductId
+  - name: inventoryProduct
+    using:
+      foreign_key_constraint_on: inventoryProductId
+  - name: simpleRecipeProduct
+    using:
+      foreign_key_constraint_on: simpleRecipeProductId
+  array_relationships:
+  - name: orderInventoryProducts
+    using:
+      foreign_key_constraint_on:
+        column: customizableProductOptionId
+        table:
+          schema: order
+          name: orderInventoryProduct
+  - name: orderMealKitProducts
+    using:
+      foreign_key_constraint_on:
+        column: customizableProductOptionId
+        table:
+          schema: order
+          name: orderMealKitProduct
+  - name: orderReadyToEatProducts
+    using:
+      foreign_key_constraint_on:
+        column: customizableProductOptionId
+        table:
+          schema: order
+          name: orderReadyToEatProduct
+- table:
+    schema: onlineStore
+    name: inventoryProduct
+  configuration:
+    custom_root_fields:
+      insert: createInventoryProduct
+      select_aggregate: inventoryProductsAggregate
+      select_by_pk: inventoryProduct
+      select: inventoryProducts
+      delete: deleteInventoryProduct
+      update: updateInventoryProduct
+    custom_column_names: {}
+  object_relationships:
+  - name: assemblyStation
+    using:
+      foreign_key_constraint_on: assemblyStationId
+  - name: sachetItem
+    using:
+      foreign_key_constraint_on: sachetItemId
+  - name: supplierItem
+    using:
+      foreign_key_constraint_on: supplierItemId
+  array_relationships:
+  - name: comboProductComponents
+    using:
+      foreign_key_constraint_on:
+        column: inventoryProductId
+        table:
+          schema: onlineStore
+          name: comboProductComponent
+  - name: customizableProductOptions
+    using:
+      foreign_key_constraint_on:
+        column: inventoryProductId
+        table:
+          schema: onlineStore
+          name: customizableProductOption
+  - name: inventoryProductOptions
+    using:
+      foreign_key_constraint_on:
+        column: inventoryProductId
+        table:
+          schema: onlineStore
+          name: inventoryProductOption
+  - name: orderInventoryProducts
+    using:
+      foreign_key_constraint_on:
+        column: inventoryProductId
+        table:
+          schema: order
+          name: orderInventoryProduct
+  computed_fields:
+  - name: isValid
+    definition:
+      function:
+        schema: onlineStore
+        name: isinventoryproductvalid
+      table_argument: null
+    comment: ""
+- table:
+    schema: onlineStore
+    name: inventoryProductOption
+  configuration:
+    custom_root_fields:
+      insert: createInventoryProductOption
+      select_aggregate: inventoryProductOptionsAggregate
+      select_by_pk: inventoryProductOption
+      select: inventoryProductOptions
+      delete: deleteInventoryProductOption
+      update: updateInventoryProductOption
+    custom_column_names: {}
+  object_relationships:
+  - name: inventoryProduct
+    using:
+      foreign_key_constraint_on: inventoryProductId
+  array_relationships:
+  - name: orderInventoryProducts
+    using:
+      foreign_key_constraint_on:
+        column: inventoryProductOptionId
+        table:
+          schema: order
+          name: orderInventoryProduct
+- table:
+    schema: onlineStore
+    name: menuCollection
+  configuration:
+    custom_root_fields:
+      insert: createMenuCollection
+      select_aggregate: menuCollectionsAggregate
+      select_by_pk: menuCollection
+      select: menuCollections
+      delete: deleteMenuCollection
+      update: updateMenuCollection
+    custom_column_names: {}
+  computed_fields:
+  - name: isValid
+    definition:
+      function:
+        schema: onlineStore
+        name: ismenucollectionvalid
+      table_argument: null
+    comment: ""
+- table:
+    schema: onlineStore
+    name: simpleRecipeProduct
+  configuration:
+    custom_root_fields:
+      insert: createSimpleRecipeProduct
+      select_aggregate: simpleRecipeProductsAggregate
+      select_by_pk: simpleRecipeProduct
+      select: simpleRecipeProducts
+      delete: deleteSimpleRecipeProduct
+      update: updateSimpleRecipeProduct
+    custom_column_names: {}
+  object_relationships:
+  - name: defaultSimpleRecipeProductOption
+    using:
+      foreign_key_constraint_on: default
+  - name: simpleRecipe
+    using:
+      foreign_key_constraint_on: simpleRecipeId
+  array_relationships:
+  - name: comboProductComponents
+    using:
+      foreign_key_constraint_on:
+        column: simpleRecipeProductId
+        table:
+          schema: onlineStore
+          name: comboProductComponent
+  - name: customizableProductOptions
+    using:
+      foreign_key_constraint_on:
+        column: simpleRecipeProductId
+        table:
+          schema: onlineStore
+          name: customizableProductOption
+  - name: orderMealKitProducts
+    using:
+      foreign_key_constraint_on:
+        column: simpleRecipeProductId
+        table:
+          schema: order
+          name: orderMealKitProduct
+  - name: orderReadyToEatProducts
+    using:
+      foreign_key_constraint_on:
+        column: simpleRecipeProductId
+        table:
+          schema: order
+          name: orderReadyToEatProduct
+  - name: simpleRecipeProductOptions
+    using:
+      foreign_key_constraint_on:
+        column: simpleRecipeProductId
+        table:
+          schema: onlineStore
+          name: simpleRecipeProductOption
+  computed_fields:
+  - name: isValid
+    definition:
+      function:
+        schema: onlineStore
+        name: issimplerecipeproductvalid
+      table_argument: null
+    comment: ""
+- table:
+    schema: onlineStore
+    name: simpleRecipeProductOption
+  configuration:
+    custom_root_fields:
+      insert: createSimpleRecipeProductOption
+      select_aggregate: simpleRecipeProductOptionsAggregate
+      select_by_pk: simpleRecipeProductOption
+      select: simpleRecipeProductOptions
+      delete: deleteSimpleRecipeProductOption
+      update: updateSimpleRecipeProductOption
+    custom_column_names: {}
+  object_relationships:
+  - name: simpleRecipeProduct
+    using:
+      foreign_key_constraint_on: simpleRecipeProductId
+  - name: simpleRecipeYield
+    using:
+      foreign_key_constraint_on: simpleRecipeYieldId
+  array_relationships:
+  - name: orderMealKitProducts
+    using:
+      foreign_key_constraint_on:
+        column: simpleRecipeProductOptionId
+        table:
+          schema: order
+          name: orderMealKitProduct
+  - name: orderReadyToEatProducts
+    using:
+      foreign_key_constraint_on:
+        column: simpleRecipeProductOptionId
+        table:
+          schema: order
+          name: orderReadyToEatProduct
+- table:
+    schema: order
+    name: assemblyEnum
+  array_relationships:
+  - name: orderSimpleRecipeProducts
+    using:
+      foreign_key_constraint_on:
+        column: assemblyStatus
+        table:
+          schema: order
+          name: orderMealKitProduct
+- table:
+    schema: order
+    name: order
+  configuration:
+    custom_root_fields:
+      insert: createOrders
+      select_aggregate: ordersAggregate
+      insert_one: createOrder
+      select_by_pk: order
+      select: orders
+      delete: deleteOrders
+      update: updateOrders
+      delete_by_pk: deleteOrder
+      update_by_pk: updateOrder
+    custom_column_names: {}
+  object_relationships:
+  - name: customer
+    using:
+      foreign_key_constraint_on: customerId
+  array_relationships:
+  - name: orderInventoryProducts
+    using:
+      foreign_key_constraint_on:
+        column: orderId
+        table:
+          schema: order
+          name: orderInventoryProduct
+  - name: orderMealKitProducts
+    using:
+      foreign_key_constraint_on:
+        column: orderId
+        table:
+          schema: order
+          name: orderMealKitProduct
+  - name: orderReadyToEatProducts
+    using:
+      foreign_key_constraint_on:
+        column: orderId
+        table:
+          schema: order
+          name: orderReadyToEatProduct
+  computed_fields:
+  - name: summary
+    definition:
+      function:
+        schema: order
+        name: ordersummary
+      table_argument: null
+    comment: ""
+  event_triggers:
+  - name: createDelivery
+    definition:
+      enable_manual: false
+      insert:
+        columns: '*'
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook_from_env: WEBHOOK_CREATE_DELIVERY
+- table:
+    schema: order
+    name: orderInventoryProduct
+  configuration:
+    custom_root_fields:
+      insert: createOrderInventoryProducts
+      select_aggregate: orderInventoryProductsAggregate
+      insert_one: createOrderInventoryProduct
+      select_by_pk: orderInventoryProduct
+      select: orderInventoryProducts
+      delete: deleteOrderInventoryProducts
+      update: updateOrderInventoryProducts
+      delete_by_pk: deleteOrderInventoryProduct
+      update_by_pk: updateOrderInventoryProduct
+    custom_column_names: {}
+  object_relationships:
+  - name: assemblyStation
+    using:
+      foreign_key_constraint_on: assemblyStationId
+  - name: comboProduct
+    using:
+      foreign_key_constraint_on: comboProductId
+  - name: comboProductComponent
+    using:
+      foreign_key_constraint_on: comboProductComponentId
+  - name: customizableProduct
+    using:
+      foreign_key_constraint_on: customizableProductId
+  - name: customizableProductOption
+    using:
+      foreign_key_constraint_on: customizableProductOptionId
+  - name: inventoryProduct
+    using:
+      foreign_key_constraint_on: inventoryProductId
+  - name: inventoryProductOption
+    using:
+      foreign_key_constraint_on: inventoryProductOptionId
+  - name: order
+    using:
+      foreign_key_constraint_on: orderId
+- table:
+    schema: order
+    name: orderMealKitProduct
+  configuration:
+    custom_root_fields:
+      insert: createOrderMealKitProducts
+      select_aggregate: orderMealKitProductsAggregate
+      insert_one: createOrderMealKitProduct
+      select_by_pk: orderMealKitProduct
+      select: orderMealKitProducts
+      delete: deleteOrderMealKitProducts
+      update: updateOrderMealKitProducts
+      delete_by_pk: deleteOrderMealKitProduct
+      update_by_pk: updateOrderMealKitProduct
+    custom_column_names: {}
+  object_relationships:
+  - name: assemblyEnum
+    using:
+      foreign_key_constraint_on: assemblyStatus
+  - name: assemblyStation
+    using:
+      foreign_key_constraint_on: assemblyStationId
+  - name: comboProduct
+    using:
+      foreign_key_constraint_on: comboProductId
+  - name: comboProductComponent
+    using:
+      foreign_key_constraint_on: comboProductComponentId
+  - name: customizableProduct
+    using:
+      foreign_key_constraint_on: customizableProductId
+  - name: customizableProductOption
+    using:
+      foreign_key_constraint_on: customizableProductOptionId
+  - name: order
+    using:
+      foreign_key_constraint_on: orderId
+  - name: simpleRecipeProduct
+    using:
+      foreign_key_constraint_on: simpleRecipeProductId
+  - name: simpleRecipeProductOption
+    using:
+      foreign_key_constraint_on: simpleRecipeProductOptionId
+  array_relationships:
+  - name: orderSachets
+    using:
+      foreign_key_constraint_on:
+        column: orderMealKitProductId
+        table:
+          schema: order
+          name: orderSachet
+- table:
+    schema: order
+    name: orderPaymentStatusEnum
+- table:
+    schema: order
+    name: orderReadyToEatProduct
+  configuration:
+    custom_root_fields:
+      insert: createOrderReadyToEatProducts
+      select_aggregate: orderReadyToEatProductsAggregate
+      insert_one: createOrderReadyToEatProduct
+      select_by_pk: orderReadyToEatProduct
+      select: orderReadyToEatProducts
+      delete: deleteOrderReadyToEatProducts
+      update: updateOrderReadyToEatProducts
+      delete_by_pk: deleteOrderReadyToEatProduct
+      update_by_pk: updateOrderReadyToEatProduct
+    custom_column_names: {}
+  object_relationships:
+  - name: assemblyStation
+    using:
+      foreign_key_constraint_on: assemblyStationId
+  - name: comboProduct
+    using:
+      foreign_key_constraint_on: comboProductId
+  - name: comboProductComponent
+    using:
+      foreign_key_constraint_on: comboProductComponentId
+  - name: customizableProduct
+    using:
+      foreign_key_constraint_on: customizableProductId
+  - name: customizableProductOption
+    using:
+      foreign_key_constraint_on: customizableProductOptionId
+  - name: order
+    using:
+      foreign_key_constraint_on: orderId
+  - name: simpleRecipe
+    using:
+      foreign_key_constraint_on: simpleRecipeId
+  - name: simpleRecipeProduct
+    using:
+      foreign_key_constraint_on: simpleRecipeProductId
+  - name: simpleRecipeProductOption
+    using:
+      foreign_key_constraint_on: simpleRecipeProductOptionId
+- table:
+    schema: order
+    name: orderSachet
+  configuration:
+    custom_root_fields:
+      insert: createOrderSachets
+      select_aggregate: orderSachetsAggregate
+      insert_one: createOrderSachet
+      select_by_pk: orderSachet
+      select: orderSachets
+      delete: deleteOrderSachets
+      update: updateOrderSachets
+      delete_by_pk: deleteOrderSachet
+      update_by_pk: updateOrderSachet
+    custom_column_names: {}
+  object_relationships:
+  - name: bulkItem
+    using:
+      foreign_key_constraint_on: bulkItemId
+  - name: ingredientSachet
+    using:
+      foreign_key_constraint_on: ingredientSachetId
+  - name: labelPrinter
+    using:
+      foreign_key_constraint_on: labelPrinterId
+  - name: orderMealKitProduct
+    using:
+      foreign_key_constraint_on: orderMealKitProductId
+  - name: packaging
+    using:
+      foreign_key_constraint_on: packagingId
+  - name: sachetItem
+    using:
+      foreign_key_constraint_on: sachetItemId
+  - name: unitId
+    using:
+      foreign_key_constraint_on: unit
+  array_relationships:
+  - name: bulkItemHistories
+    using:
+      foreign_key_constraint_on:
+        column: orderSachetId
+        table:
+          schema: inventory
+          name: bulkItemHistory
+  - name: sachetItemHistories
+    using:
+      foreign_key_constraint_on:
+        column: orderSachetId
+        table:
+          schema: inventory
+          name: sachetItemHistory
+  event_triggers:
+  - name: OrderSachetCreation
+    definition:
+      enable_manual: true
+      insert:
+        columns: '*'
+      update:
+        columns:
+        - ingredientSachetId
+        - orderMealKitProductId
+        - quantity
+        - accuracy
+        - processingName
+        - status
+        - bulkItemId
+        - packagingId
+        - sachetItemId
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook_from_env: WEBHOOK_ORDER_SACHET_CREATION
+- table:
+    schema: order
+    name: orderSachetStatusEnum
+  is_enum: true
+- table:
+    schema: order
+    name: orderStatusEnum
+- table:
+    schema: packaging
+    name: packaging
+  configuration:
+    custom_root_fields:
+      insert: createPackaging
+      select_aggregate: packagingAggregate
+      select_by_pk: packaging
+      select: packagings
+      delete: deletePackaging
+      update: updatePackaging
+    custom_column_names: {}
+  object_relationships:
+  - name: supplier
+    using:
+      foreign_key_constraint_on: supplierId
+  array_relationships:
+  - name: sachetWorkOrders
+    using:
+      foreign_key_constraint_on:
+        column: packagingId
+        table:
+          schema: inventory
+          name: sachetWorkOrder
+- table:
+    schema: safety
+    name: safetyCheck
+  array_relationships:
+  - name: SafetyCheckPerUsers
+    using:
+      foreign_key_constraint_on:
+        column: SafetyCheckId
+        table:
+          schema: safety
+          name: safetyCheckPerUser
+- table:
+    schema: safety
+    name: safetyCheckPerUser
+  object_relationships:
+  - name: safetyCheck
+    using:
+      foreign_key_constraint_on: SafetyCheckId
+  - name: user
+    using:
+      foreign_key_constraint_on: userId
+- table:
+    schema: settings
+    name: station
+  configuration:
+    custom_root_fields:
+      insert: createStation
+      select_aggregate: stationsAggregate
+      select_by_pk: station
+      select: stations
+      delete: deleteStation
+      update: updateStation
+    custom_column_names: {}
+  array_relationships:
+  - name: bulkWorkOrders
+    using:
+      foreign_key_constraint_on:
+        column: stationId
+        table:
+          schema: inventory
+          name: bulkWorkOrder
+  - name: recipesToAssemble
+    using:
+      foreign_key_constraint_on:
+        column: assemblyStationId
+        table:
+          schema: simpleRecipe
+          name: simpleRecipe
+  - name: sachetWorkOrders
+    using:
+      foreign_key_constraint_on:
+        column: stationId
+        table:
+          schema: inventory
+          name: sachetWorkOrder
+  - name: users
+    using:
+      foreign_key_constraint_on:
+        column: stationId
+        table:
+          schema: deviceHub
+          name: user_station
+- table:
+    schema: settings
+    name: user
+  array_relationships:
+  - name: bulkWorkOrders
+    using:
+      foreign_key_constraint_on:
+        column: userId
+        table:
+          schema: inventory
+          name: bulkWorkOrder
+  - name: sachetWorkOrders
+    using:
+      foreign_key_constraint_on:
+        column: userId
+        table:
+          schema: inventory
+          name: sachetWorkOrder
+  - name: stations
+    using:
+      foreign_key_constraint_on:
+        column: userId
+        table:
+          schema: deviceHub
+          name: user_station
+- table:
+    schema: simpleRecipe
+    name: simpleRecipe
+  configuration:
+    custom_root_fields:
+      insert: createSimpleRecipe
+      select_aggregate: simpleRecipesAggregate
+      select_by_pk: simpleRecipe
+      select: simpleRecipes
+      delete: deleteSimpleRecipe
+      update: updateSimpleRecipe
+    custom_column_names: {}
+  object_relationships:
+  - name: assemblyStation
+    using:
+      foreign_key_constraint_on: assemblyStationId
+  - name: cuisineNameId
+    using:
+      foreign_key_constraint_on: cuisine
+  array_relationships:
+  - name: orderReadyToEatProducts
+    using:
+      foreign_key_constraint_on:
+        column: simpleRecipeId
+        table:
+          schema: order
+          name: orderReadyToEatProduct
+  - name: simpleRecipeProducts
+    using:
+      foreign_key_constraint_on:
+        column: simpleRecipeId
+        table:
+          schema: onlineStore
+          name: simpleRecipeProduct
+  - name: simpleRecipeYields
+    using:
+      foreign_key_constraint_on:
+        column: simpleRecipeId
+        table:
+          schema: simpleRecipe
+          name: simpleRecipeYield
+  computed_fields:
+  - name: isValid
+    definition:
+      function:
+        schema: simpleRecipe
+        name: issimplerecipevalid
+      table_argument: null
+    comment: ""
+- table:
+    schema: simpleRecipe
+    name: simpleRecipeYield
+  configuration:
+    custom_root_fields:
+      insert: createSimpleRecipeYield
+      select_aggregate: simpleRecipeYieldsAggregate
+      select_by_pk: simpleRecipeYield
+      select: simpleRecipeYields
+      delete: deleteSimpleRecipeYield
+      update: updateSimpleRecipeYield
+    custom_column_names: {}
+  object_relationships:
+  - name: simpleRecipe
+    using:
+      foreign_key_constraint_on: simpleRecipeId
+  array_relationships:
+  - name: ingredientSachets
+    using:
+      foreign_key_constraint_on:
+        column: recipeYieldId
+        table:
+          schema: simpleRecipe
+          name: simpleRecipeYield_ingredientSachet
+- table:
+    schema: simpleRecipe
+    name: simpleRecipeYield_ingredientSachet
+  configuration:
+    custom_root_fields:
+      insert: createSimpleRecipeSachet
+      select_aggregate: simpleRecipeSachetsAggregate
+      select_by_pk: simpleRecipeSachet
+      select: simpleRecipeSachets
+      delete: deleteSimpleRecipeSachet
+      update: updateSimpleRecipeSachet
+    custom_column_names: {}
+  object_relationships:
+  - name: ingredientSachet
+    using:
+      foreign_key_constraint_on: ingredientSachetId
+  - name: simpleRecipeYield
+    using:
+      foreign_key_constraint_on: recipeYieldId
+- table:
+    schema: unit
+    name: unit
+  configuration:
+    custom_root_fields:
+      insert: createUnit
+      select_aggregate: unitsAggregate
+      select_by_pk: unit
+      select: units
+      delete: deleteUnit
+      update: updateUnit
+    custom_column_names: {}
+  array_relationships:
+  - name: bulkItemHistories
+    using:
+      foreign_key_constraint_on:
+        column: unit
+        table:
+          schema: inventory
+          name: bulkItemHistory
+  - name: bulkItems
+    using:
+      foreign_key_constraint_on:
+        column: unit
+        table:
+          schema: inventory
+          name: bulkItem
+  - name: bulkWorkOrders
+    using:
+      foreign_key_constraint_on:
+        column: inputQuantityUnit
+        table:
+          schema: inventory
+          name: bulkWorkOrder
+  - name: ingredientSachets
+    using:
+      foreign_key_constraint_on:
+        column: unit
+        table:
+          schema: ingredient
+          name: ingredientSachet
+  - name: inputUnitConversions
+    using:
+      foreign_key_constraint_on:
+        column: inputUnitName
+        table:
+          schema: unit
+          name: unitConversion
+  - name: orderSachets
+    using:
+      foreign_key_constraint_on:
+        column: unit
+        table:
+          schema: order
+          name: orderSachet
+  - name: outputUnitConversions
+    using:
+      foreign_key_constraint_on:
+        column: outputUnitName
+        table:
+          schema: unit
+          name: unitConversion
+  - name: purchaseOrderItems
+    using:
+      foreign_key_constraint_on:
+        column: unit
+        table:
+          schema: inventory
+          name: purchaseOrderItem
+  - name: sachetItems
+    using:
+      foreign_key_constraint_on:
+        column: unit
+        table:
+          schema: inventory
+          name: sachetItem
+  - name: supplierItems
+    using:
+      foreign_key_constraint_on:
+        column: unit
+        table:
+          schema: inventory
+          name: supplierItem
+- table:
+    schema: unit
+    name: unitConversion
+  configuration:
+    custom_root_fields:
+      insert: createUnitConversion
+      select_aggregate: unitConversionsAggregate
+      select_by_pk: unitConversion
+      select: unitConversions
+      delete: deleteUnitConversion
+      update: updateUnitConversion
+    custom_column_names: {}
+  object_relationships:
+  - name: inputUnit
+    using:
+      foreign_key_constraint_on: outputUnitName
+  - name: outputUnit
+    using:
+      foreign_key_constraint_on: inputUnitName
+  array_relationships:
+  - name: unitConversionByBulkItems
+    using:
+      foreign_key_constraint_on:
+        column: unitConversionId
+        table:
+          schema: inventory
+          name: unitConversionByBulkItem

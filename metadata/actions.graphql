@@ -1,0 +1,10 @@
+
+
+type Menu {
+  name : String
+  comboProducts : [Int]!
+  customizableProducts : [Int]!
+  inventoryProducts : [Int]!
+  simpleRecipeProducts : [Int!]
+}
+
